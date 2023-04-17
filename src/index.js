@@ -1,71 +1,54 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { legacy_createStore as createStore } from 'redux';
+import { legacy_createStore as createStore, bindActionCreators } from 'redux';
 
-const initialState = {
-  value: 0,
-};
-
-// функция reducer всегда должна быть чистой функцией-(должна зависить от state который в нее приходит и от action), при этом она должна возвращать один и тот же результат при одинаковых аргументах и не иметь никаких побочных эффектов.
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case 'INC':
-      // return state + 1; (ниже мы соблюдаем принципы иммутабельности).
-      return {
-        ...state,
-        value: state.value + 1,
-      };
-    case 'DEC':
-      // return state - 1; (ниже мы соблюдаем принципы иммутабельности).
-      return {
-        ...state,
-        value: state.value - 1,
-      };
-    case 'RND':
-      // return state * action.payload; (ниже мы соблюдаем принципы иммутабельности).
-      return {
-        ...state,
-        value: state.value * action.payload,
-      };
-    default:
-      return state;
-  }
-};
+// import { inc, dec, rnd } from './actions';
+import * as actions from './actions';
+import reducer from './reducer';
 
 // store - это какое то хранилище, а state состояние.
 // одно хранилище и это хранилище включает в себя как state так и dispatch который ссылается на тот state который есть внутри этого stora.
 const store = createStore(reducer);
+const { dispatch, subscribe, getState } = store;
 
 const update = () => {
-  document.getElementById('counter').textContent = store.getState().value;
+  document.getElementById('counter').textContent = getState().value;
 };
 
 // subscribe подписка на изменения-(прослушиватель изменений).
 // store.subscribe(() => {
 //   console.log(store.getState());
 // });
-store.subscribe(update);
+subscribe(update);
 
-// Action Creators - создатель наших экшенов.
-const inc = () => ({ type: 'INC' });
-const dec = () => ({ type: 'DEC' });
-const rnd = (value) => ({ type: 'RND', payload: value });
-// const inc = () => {
-//   return {
-//     type: 'INC',
-//   };
+// bindActionCreators в нее передаем первым аргументом actionCreator, вторым dispatch.
+// Также можно биндить сразу несколько функций в виде объекта.
+const { inc, dec, rnd } = bindActionCreators(actions, dispatch);
+// !!! пример еще большего сокращения, см. 5 строчка. Как было снизу.
+// const { incDispatch, decDispatch, rndDispatch } = bindActionCreators(
+//   {
+//     incDispatch: inc,
+//     decDispatch: dec,
+//     rndDispatch: rnd,
+//   },
+//   dispatch
+// );
+// !!!!! Вот тут поменяли один action creator на объект с ключами и значениями.
+// ниже как было до.
+// const incDispatch = bindActionCreators(inc, dispatch);
+// const decDispatch = bindActionCreators(dec, dispatch);
+// const rndDispatch = bindActionCreators(rnd, dispatch);
+// под капотом все оборачивается вот в такую конструкцию.
+// const bindActionCreator = (creator, dispatch) => (...arguments) => {
+//   dispatch(creator(...arguments));
 // };
 
-document.getElementById('inc').addEventListener('click', () => {
-  store.dispatch(inc());
-});
+document.getElementById('inc').addEventListener('click', inc);
 // document.getElementById('inc').addEventListener('click', () => {
 //   store.dispatch({ type: 'INC' });
 // });
 
-document.getElementById('dec').addEventListener('click', () => {
-  store.dispatch(dec());
-});
+document.getElementById('dec').addEventListener('click', dec);
 // document.getElementById('dec').addEventListener('click', () => {
 //   store.dispatch({ type: 'DEC' });
 // });
@@ -73,7 +56,7 @@ document.getElementById('dec').addEventListener('click', () => {
 // dispatch принимает только один обязательный аргумент это тип действия({ type: 'INC' }) , но кроме типа может быть и полезная нагрузка (payload).
 document.getElementById('rnd').addEventListener('click', () => {
   const value = Math.floor(Math.random() * 10);
-  store.dispatch(rnd(value));
+  rnd(value);
 });
 // document.getElementById('rnd').addEventListener('click', () => {
 //   const value = Math.floor(Math.random() * 10);
