@@ -1,9 +1,11 @@
-import { useEffect, useReducer } from 'react';
+import { useDispatch } from 'react-redux';
+
 import {
   CounterId,
   DecrementAction,
   IncrementAction,
-  store,
+  selectCounter,
+  useAppSelector,
 } from './redux/store';
 
 import viteLogo from '/vite.svg';
@@ -38,21 +40,17 @@ function App() {
 }
 
 export function Counter({ counterId }: { counterId: CounterId }) {
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const dispatch = useDispatch();
+  const counterState = useAppSelector((state) =>
+    selectCounter(state, counterId)
+  );
 
-  useEffect(() => {
-    const unsubscribe = store.subscribe(() => {
-      forceUpdate();
-    });
-
-    return unsubscribe;
-  }, []);
   return (
     <>
-      counter {store.getState().counters[counterId]?.counter}
+      counter {counterState?.counter}
       <button
         onClick={() =>
-          store.dispatch({
+          dispatch({
             type: 'increment',
             payload: { counterId },
           } satisfies IncrementAction)
@@ -62,7 +60,7 @@ export function Counter({ counterId }: { counterId: CounterId }) {
       </button>
       <button
         onClick={() =>
-          store.dispatch({
+          dispatch({
             type: 'decrement',
             payload: { counterId },
           } satisfies DecrementAction)
