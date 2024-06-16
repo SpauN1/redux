@@ -1,8 +1,6 @@
 import { Counters } from './modules/counters/counters';
 import { UsersList } from './modules/users/userList';
 
-import './styles/style.css';
-
 function App() {
   return (
     <div className="container p-5 flex flex-col gap-5">
