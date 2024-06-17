@@ -27,14 +27,14 @@ export const countersReducer = createReducer(
       if (!state[counterId]) {
         state[counterId] = initialCounterState;
       }
-      state[counterId].counter++;
+      state[counterId]!.counter++;
     });
     builder.addCase(decrementAction, (state, action) => {
       const { counterId } = action.payload;
       if (!state[counterId]) {
         state[counterId] = initialCounterState;
       }
-      state[counterId].counter++;
+      state[counterId]!.counter++;
     });
   }
 );
